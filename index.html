@@ -25,8 +25,10 @@
             padding: 20px;
             max-width: 1000px;
             width: 100%;
-            overflow-y: auto;
-            position: relative;
+            height: 90vh; /* Adjust height to fit viewport */
+            overflow: hidden; /* Prevent body scrolling */
+            display: flex;
+            flex-direction: column;
         }
 
         .search-bar {
@@ -86,12 +88,14 @@
         }
 
         .file-list {
-            margin-top: 20px;
+            flex: 1;
+            overflow-y: auto; /* Allow scrolling */
         }
 
         .file-list ul {
             list-style-type: none;
             padding: 0;
+            margin: 0;
         }
 
         .file-list li {
@@ -100,8 +104,7 @@
 
         .folder-item,
         .file-item {
-            display: ;
-            align-items: center;
+            display: block;
             padding: 10px;
             background: #f8f9fa;
             border-radius: 5px;
@@ -124,7 +127,7 @@
             text-decoration: none;
             color: #007bff;
             font-size: 16px;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             width: 100%;
         }
@@ -303,7 +306,7 @@
 
             folderItems.forEach(item => {
                 const text = item.textContent.toLowerCase();
-                item.style.display = text.includes(query) ? 'flex' : 'none';
+                item.style.display = text.includes(query) ? 'block' : 'none';
                 const collapsibleContent = item.nextElementSibling;
                 if (collapsibleContent) {
                     collapsibleContent.style.display = text.includes(query) ? 'block' : 'none';
@@ -312,7 +315,7 @@
 
             fileItems.forEach(item => {
                 const text = item.textContent.toLowerCase();
-                item.parentElement.style.display = text.includes(query) ? 'flex' : 'none';
+                item.parentElement.style.display = text.includes(query) ? 'block' : 'none';
             });
         });
 
