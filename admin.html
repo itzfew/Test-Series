@@ -7,7 +7,7 @@
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
-        body {
+      body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
             margin: 0;
@@ -204,6 +204,22 @@
             font-size: 16px;
             color: #333;
         }
+        /* Existing styles... */
+
+        /* Adjustments for better layout and usability */
+        .file-list {
+            margin-top: 20px;
+            max-height: 400px; /* Adjust based on your needs */
+            overflow-y: auto;
+        }
+
+        .file-item {
+            background: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
@@ -217,11 +233,11 @@
                 <h2>Sign In / Sign Up</h2>
                 <div class="input-group">
                     <label for="email">Email:</label>
-                    <input type="email" id="email" placeholder="Enter your email">
+                    <input type="email" id="email" placeholder="Enter your email" required>
                 </div>
                 <div class="input-group">
                     <label for="password">Password:</label>
-                    <input type="password" id="password" placeholder="Enter your password">
+                    <input type="password" id="password" placeholder="Enter your password" required>
                 </div>
                 <button id="authButton">Sign In / Sign Up</button>
                 <div id="authStatus" class="status"></div>
@@ -234,7 +250,7 @@
 
         <div class="input-group">
             <label for="folderName"><i class="fas fa-folder icon"></i> Folder Name:</label>
-            <input type="text" id="folderName" placeholder="Enter folder name...">
+            <input type="text" id="folderName" placeholder="Enter folder name..." required>
         </div>
         <div class="input-group">
             <label for="subFolderName"><i class="fas fa-folder-plus icon"></i> Subfolder Name (optional):</label>
@@ -259,7 +275,6 @@
     <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-storage.js"></script>
     <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-database.js"></script>
     <script>
-        // Your web app's Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyA_dNTrWIo8fSTub-J4uh_Yjf4Fr_qay3c",
             authDomain: "ind-edu.firebaseapp.com",
@@ -271,15 +286,12 @@
             measurementId: "G-XLZRGM88T9"
         };
 
-        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
 
-        // Get references to services
         const auth = firebase.auth();
         const storage = firebase.storage();
         const database = firebase.database();
 
-        // Show authentication modal if not logged in
         const authModal = document.getElementById('authModal');
         const authButton = document.getElementById('authButton');
         const closeModal = document.getElementById('closeModal');
@@ -289,30 +301,24 @@
         const logoutButton = document.getElementById('logoutButton');
         const uploadButton = document.getElementById('uploadButton');
 
-        // Display authentication modal
         function showAuthModal() {
             authModal.style.display = 'flex';
         }
 
-        // Close authentication modal
         closeModal.addEventListener('click', () => {
             authModal.style.display = 'none';
         });
 
-        // Authenticate user
         authButton.addEventListener('click', () => {
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value.trim();
 
             if (email && password) {
                 auth.signInWithEmailAndPassword(email, password)
-                    .catch(() => {
-                        // If sign-in fails, create a new user
-                        auth.createUserWithEmailAndPassword(email, password)
-                            .catch((error) => {
-                                authStatus.textContent = `Error: ${error.message}`;
-                                authStatus.className = 'status error';
-                            });
+                    .catch(() => auth.createUserWithEmailAndPassword(email, password))
+                    .catch((error) => {
+                        authStatus.textContent = `Error: ${error.message}`;
+                        authStatus.className = 'status error';
                     });
             } else {
                 authStatus.textContent = 'Please enter both email and password.';
@@ -320,24 +326,20 @@
             }
         });
 
-        // Handle user sign-in
         auth.onAuthStateChanged((user) => {
             if (user) {
-                // User is signed in
                 accountEmail.textContent = user.email;
                 accountInfo.style.display = 'block';
                 uploadButton.disabled = false;
                 authModal.style.display = 'none';
-                loadFileList(); // Reload file list
+                loadFileList();
             } else {
-                // User is signed out
                 accountInfo.style.display = 'none';
                 uploadButton.disabled = true;
                 showAuthModal();
             }
         });
 
-        // Handle user logout
         logoutButton.addEventListener('click', () => {
             auth.signOut().then(() => {
                 accountInfo.style.display = 'none';
@@ -424,7 +426,7 @@
                                 fileInput.value = '';
                                 document.getElementById('folderName').value = '';
                                 document.getElementById('subFolderName').value = '';
-                                loadFileList(); // Reload file list
+                                loadFileList();
                             }
                         });
                     }).catch((error) => {
