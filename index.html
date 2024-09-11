@@ -100,7 +100,7 @@
 
         .folder-item,
         .file-item {
-            display: ;
+            display: flex;
             align-items: center;
             padding: 10px;
             background: #f8f9fa;
@@ -126,6 +126,7 @@
             font-size: 16px;
             display: flex;
             align-items: center;
+            width: 100%;
         }
 
         .file-item a:hover {
@@ -134,6 +135,13 @@
 
         .file-item i {
             margin-right: 8px;
+        }
+
+        .file-date {
+            font-size: 14px;
+            color: #666;
+            margin-left: auto;
+            padding-left: 10px;
         }
 
         .collapsible-content {
@@ -206,7 +214,10 @@
 
                 snapshot.forEach(childSnapshot => {
                     const fileData = childSnapshot.val();
-                    const { folder, subfolder, name, url } = fileData;
+                    const { folder, subfolder, name, url, date } = fileData;
+
+                    // Format date
+                    const formattedDate = new Date(date).toLocaleDateString();
 
                     // Organize files into folders and subfolders
                     if (!folders[folder]) {
@@ -217,9 +228,9 @@
                         if (!folders[folder][subfolder]) {
                             folders[folder][subfolder] = [];
                         }
-                        folders[folder][subfolder].push({ name, url });
+                        folders[folder][subfolder].push({ name, url, date: formattedDate });
                     } else {
-                        files.push({ name, url });
+                        files.push({ name, url, date: formattedDate });
                     }
                 });
 
@@ -247,7 +258,7 @@
                         folders[folder][subfolder].forEach(file => {
                             const fileItem = document.createElement('li');
                             fileItem.className = 'file-item';
-                            fileItem.innerHTML = `<a href="${file.url}" target="_blank"><i class="fas fa-file"></i> ${file.name}</a>`;
+                            fileItem.innerHTML = `<a href="${file.url}" target="_blank"><i class="fas fa-file"></i> ${file.name}<span class="file-date">${file.date}</span></a>`;
                             subfolderItem.appendChild(fileItem);
                         });
                     });
@@ -270,7 +281,7 @@
                 files.forEach(file => {
                     const fileItem = document.createElement('li');
                     fileItem.className = 'file-item';
-                    fileItem.innerHTML = `<a href="${file.url}" target="_blank"><i class="fas fa-file"></i> ${file.name}</a>`;
+                    fileItem.innerHTML = `<a href="${file.url}" target="_blank"><i class="fas fa-file"></i> ${file.name}<span class="file-date">${file.date}</span></a>`;
                     fileList.appendChild(fileItem);
                 });
 
