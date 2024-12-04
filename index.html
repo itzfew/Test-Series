@@ -67,10 +67,61 @@
             display: none;
             padding-left: 20px;
         }
+      /* Style for the button container */
+.button-container {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 50px;
+}
+.buttons {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 20px;
+  font-size: 18px;
+  color: #3498db;
+  border: 2px solid #3498db;
+  border-radius: 8px;
+  cursor: pointer;
+  text-decoration: none; /* Remove underline from links */
+  transition: all 0.3s ease;
+}
+
+.btn i {
+  margin-right: 8px;
+}
+
+.btn:hover {
+  color: white;
+  background-color: #3498db;
+  border-color: #2980b9;
+}
+
+.btn:focus {
+  outline: none;
+}
+
     </style>
 </head>
 <body>
-    <div class="container">
+  <div class="container">
+  <div class="button-container">
+        <!-- Upload Tests Button -->
+        <a href="admin-upload-tests.html" class="btn">
+            <i class="fas fa-upload"></i> Upload Tests
+        </a>
+
+        <!-- More PDFs Button -->
+        <a href="more-pdfs.html" class="btn">
+            <i class="fas fa-file-pdf"></i> More PDFs
+        </a>
+    </div>
         <h1><i class="fas fa-folder-open"></i> PremiumStorage Viewer</h1>
         <div id="fileList" class="file-list">
             <!-- Files and folders will be displayed here -->
