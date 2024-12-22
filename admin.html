@@ -7,7 +7,8 @@
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
-      body {
+        /* Existing styles... */
+        body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
             margin: 0;
@@ -46,7 +47,8 @@
         }
 
         .input-group input[type="text"],
-        .input-group input[type="file"] {
+        .input-group input[type="file"],
+        .input-group select {
             display: block;
             width: 100%;
             padding: 8px;
@@ -204,22 +206,6 @@
             font-size: 16px;
             color: #333;
         }
-        /* Existing styles... */
-
-        /* Adjustments for better layout and usability */
-        .file-list {
-            margin-top: 20px;
-            max-height: 400px; /* Adjust based on your needs */
-            overflow-y: auto;
-        }
-
-        .file-item {
-            background: #ffffff;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            padding: 10px;
-            margin-bottom: 10px;
-        }
     </style>
 </head>
 <body>
@@ -249,12 +235,18 @@
         </div>
 
         <div class="input-group">
-            <label for="folderName"><i class="fas fa-folder icon"></i> Folder Name:</label>
-            <input type="text" id="folderName" placeholder="Enter folder name..." required>
+            <label for="folderSelect"><i class="fas fa-folder icon"></i> Folder:</label>
+            <select id="folderSelect">
+                <option value="" disabled selected>Select a folder...</option>
+            </select>
+            <input type="text" id="newFolderInput" placeholder="Or enter a new folder name">
         </div>
         <div class="input-group">
-            <label for="subFolderName"><i class="fas fa-folder-plus icon"></i> Subfolder Name (optional):</label>
-            <input type="text" id="subFolderName" placeholder="Enter subfolder name...">
+            <label for="subFolderSelect"><i class="fas fa-folder-plus icon"></i> Subfolder:</label>
+            <select id="subFolderSelect">
+                <option value="" disabled selected>Select a subfolder...</option>
+            </select>
+            <input type="text" id="newSubFolderInput" placeholder="Or enter a new subfolder name">
         </div>
         <div class="input-group">
             <label for="fileInput"><i class="fas fa-file-upload icon"></i> Select Files:</label>
@@ -300,6 +292,10 @@
         const accountEmail = document.getElementById('accountEmail');
         const logoutButton = document.getElementById('logoutButton');
         const uploadButton = document.getElementById('uploadButton');
+        const folderSelect = document.getElementById('folderSelect');
+        const subFolderSelect = document.getElementById('subFolderSelect');
+        const newFolderInput = document.getElementById('newFolderInput');
+        const newSubFolderInput = document.getElementById('newSubFolderInput');
 
         function showAuthModal() {
             authModal.style.display = 'flex';
@@ -332,6 +328,7 @@
                 accountInfo.style.display = 'block';
                 uploadButton.disabled = false;
                 authModal.style.display = 'none';
+                loadFolders();
                 loadFileList();
             } else {
                 accountInfo.style.display = 'none';
@@ -355,8 +352,8 @@
                 return;
             }
 
-            const folderName = document.getElementById('folderName').value.trim();
-            const subFolderName = document.getElementById('subFolderName').value.trim();
+            const folderName = newFolderInput.value.trim() || folderSelect.value;
+            const subFolderName = newSubFolderInput.value.trim() || subFolderSelect.value;
             const fileInput = document.getElementById('fileInput');
             const files = fileInput.files;
 
@@ -424,8 +421,7 @@
                                 statusElement.textContent = 'Files uploaded and data saved successfully';
                                 statusElement.className = 'status success';
                                 fileInput.value = '';
-                                document.getElementById('folderName').value = '';
-                                document.getElementById('subFolderName').value = '';
+                                loadFolders();
                                 loadFileList();
                             }
                         });
@@ -436,6 +432,42 @@
                     });
                 });
             });
+        });
+
+        function loadFolders() {
+            folderSelect.innerHTML = '<option value="" disabled selected>Select a folder...</option>';
+            subFolderSelect.innerHTML = '<option value="" disabled selected>Select a subfolder...</option>';
+
+            const storageRef = storage.ref();
+            storageRef.listAll().then((res) => {
+                res.prefixes.forEach((folderRef) => {
+                    const option = document.createElement('option');
+                    option.value = folderRef.name;
+                    option.textContent = folderRef.name;
+                    folderSelect.appendChild(option);
+                });
+            }).catch((error) => {
+                console.error('Error loading folders:', error);
+            });
+        }
+
+        folderSelect.addEventListener('change', () => {
+            const selectedFolder = folderSelect.value;
+            subFolderSelect.innerHTML = '<option value="" disabled selected>Select a subfolder...</option>';
+
+            if (selectedFolder) {
+                const folderRef = storage.ref(selectedFolder);
+                folderRef.listAll().then((res) => {
+                    res.prefixes.forEach((subFolderRef) => {
+                        const option = document.createElement('option');
+                        option.value = subFolderRef.name;
+                        option.textContent = subFolderRef.name;
+                        subFolderSelect.appendChild(option);
+                    });
+                }).catch((error) => {
+                    console.error('Error loading subfolders:', error);
+                });
+            }
         });
 
         function loadFileList() {
