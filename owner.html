@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        h1 {
+            font-family: 'Roboto', sans-serif;
+            font-size: 30px;
+            font-weight: bold;
+            color: #2c3e50;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        h1 i {
+            margin-right: 10px;
+            color: #3498db;
+        }
+
+        .container {
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            max-width: 1000px;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .file-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0;
+            margin: 0;
+        }
+
+        .folder-item, .file-item {
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .folder-item:hover, .file-item:hover {
+            background: #e2e6ea;
+        }
+
+        .folder-item i, .file-item i {
+            margin-right: 8px;
+        }
+
+        .collapsible-content {
+            display: none;
+            padding-left: 20px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 10px 20px;
+            font-size: 18px;
+            color: #3498db;
+            border: 2px solid #3498db;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn i {
+            margin-right: 8px;
+        }
+
+        .btn:hover {
+            color: white;
+            background-color: #3498db;
+            border-color: #2980b9;
+        }
+
+        .btn:focus {
+            outline: none;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .delete-btn {
+            background-color: #e74c3c;
+            border-color: #e74c3c;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        .delete-btn:hover {
+            background-color: #c0392b;
+            border-color: #c0392b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><i class="fas fa-folder-open"></i> Admin Panel</h1>
+        <div id="fileList" class="file-list">
+            <!-- Files and folders will be displayed here -->
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-storage.js"></script>
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyA_dNTrWIo8fSTub-J4uh_Yjf4Fr_qay3c",
+            authDomain: "ind-edu.firebaseapp.com",
+            projectId: "ind-edu",
+            storageBucket: "ind-edu.appspot.com",
+            messagingSenderId: "60520122150",
+            appId: "1:60520122150:web:0205f57353dae6cfc723e7",
+            measurementId: "G-XLZRGM88T9"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        // Get Firebase Storage reference
+        const storage = firebase.storage();
+
+        // Display files and folders recursively
+        async function listFolder(path = '') {
+            const storageRef = storage.ref(path);
+            const result = await storageRef.listAll();
+            return result;
+        }
+
+        // Create folder structure recursively
+        async function displayFolderContents(parentElement, path = '') {
+            const folderContents = await listFolder(path);
+
+            folderContents.prefixes.forEach(async (folderRef) => {
+                // Create a folder element
+                const folderItem = document.createElement('div');
+                folderItem.className = 'folder-item';
+                folderItem.innerHTML = `<i class="fas fa-folder"></i> <span>${folderRef.name}</span>`;
+
+                // Create a collapsible area
+                const collapsibleContent = document.createElement('div');
+                collapsibleContent.className = 'collapsible-content';
+
+                // Add event listener to toggle visibility
+                folderItem.addEventListener('click', async () => {
+                    const isVisible = collapsibleContent.style.display === 'block';
+                    collapsibleContent.style.display = isVisible ? 'none' : 'block';
+                    if (!isVisible && collapsibleContent.childNodes.length === 0) {
+                        await displayFolderContents(collapsibleContent, folderRef.fullPath);
+                    }
+                });
+
+                // Create action buttons
+                const actions = document.createElement('div');
+                actions.className = 'actions';
+                actions.innerHTML = `
+                    <button class="delete-btn" onclick="deleteItem('${folderRef.fullPath}', true)">Delete</button>
+                `;
+
+                // Append folder, actions, and collapsible area
+                folderItem.appendChild(actions);
+                parentElement.appendChild(folderItem);
+                parentElement.appendChild(collapsibleContent);
+            });
+
+            folderContents.items.forEach((fileRef) => {
+                // Create a file element
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+
+                // Get file URL and add to the file item
+                fileRef.getDownloadURL().then((url) => {
+                    fileItem.innerHTML = `<span><a href="${url}" target="_blank"><i class="fas fa-file"></i> ${fileRef.name}</a></span>`;
+
+                    // Create action buttons
+                    const actions = document.createElement('div');
+                    actions.className = 'actions';
+                    actions.innerHTML = `
+                        <button class="delete-btn" onclick="deleteItem('${fileRef.fullPath}', false)">Delete</button>
+                    `;
+
+                    // Append file and actions
+                    fileItem.appendChild(actions);
+                    parentElement.appendChild(fileItem);
+                });
+            });
+        }
+
+        // Initialize display
+        const fileListContainer = document.getElementById('fileList');
+        displayFolderContents(fileListContainer);
+
+        // Function to delete item
+        async function deleteItem(fullPath, isFolder) {
+            if (confirm('Are you sure you want to delete this item?')) {
+                const ref = storage.ref(fullPath);
+                if (isFolder) {
+                    const folderContents = await listFolder(fullPath);
+                    // Delete all files and folders recursively
+                    for (let item of folderContents.items) {
+                        await item.delete();
+                    }
+                    for (let prefix of folderContents.prefixes) {
+                        await deleteItem(prefix.fullPath, true);
+                    }
+                } else {
+                    await ref.delete();
+                }
+                alert('Item deleted successfully.');
+                location.reload();
+            }
+        }
+    </script>
+</body> 
+</html> 
