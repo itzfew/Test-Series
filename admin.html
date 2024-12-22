@@ -402,14 +402,13 @@
                     progressBar.style.backgroundColor = '#dc3545';
                 }, () => {
                     uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
-                        const encodedURL = `https://adrinolinks.in/st?api=5a2539904639474b5f3da41f528199204eb76f65&url=${downloadURL}`;
                         const fileData = {
                             name: file.name,
-                            url: encodedURL,
+                            url: downloadURL,
                             date: new Date().toISOString(),
                             folder: folderName,
                             subfolder: subFolderName || '',
-                            uid: auth.currentUser.uid
+                            email: auth.currentUser.email
                         };
 
                         database.ref('files').push(fileData, (error) => {
@@ -474,7 +473,7 @@
             const fileListElement = document.getElementById('fileList');
             fileListElement.innerHTML = '<h2><i class="fas fa-list icon"></i> Uploaded Files</h2>';
 
-            database.ref('files').orderByChild('uid').equalTo(auth.currentUser.uid).once('value').then((snapshot) => {
+            database.ref('files').orderByChild('email').equalTo(auth.currentUser.email).once('value').then((snapshot) => {
                 snapshot.forEach((childSnapshot) => {
                     const fileData = childSnapshot.val();
                     const fileItem = document.createElement('div');
