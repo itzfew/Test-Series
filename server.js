@@ -21,7 +21,7 @@ app.post('/generate-paytm-url', (req, res) => {
         MOBILE_NO: customerPhone
     };
 
-    PaytmChecksum.generateSignature(paytmParams, 'YOUR_PAYTM_MERCHANT_KEY') // Replace with your Paytm Merchant Key
+    PaytmChecksum.generateSignature(paytmParams, 'kjUacW86417911881738') // Replace with your Paytm Merchant Key
     .then((checksum) => {
         paytmParams.CHECKSUMHASH = checksum;
         res.json({
